@@ -1,5 +1,7 @@
 # Steward Commons
 
+![Steward Compatible v1.0](assets/steward-compatible-badge.svg)
+
 **An open protocol for preserving how ideas, decisions, evidence, and outcomes evolve.**
 
 Steward Commons is a protocol-first project for making reasoning durable. It captures not only final decisions, but the proposals, evidence, objections, tradeoffs, reflections, and later outcomes that shaped them.
