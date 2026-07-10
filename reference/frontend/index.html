@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Steward Commons — Web UI (browser vault)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2430; --ink:#e6edf3;
+    --muted:#8b949e; --accent:#7ee787; --accent2:#58a6ff; --border:#30363d; --warn:#f85149;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink)}
+  header{padding:26px 22px 14px;text-align:center;
+    background:radial-gradient(900px 300px at 50% -120px,#1f6feb22,transparent)}
+  h1{font-size:1.6rem;margin:0}
+  .tag{color:var(--muted);max-width:640px;margin:6px auto 0}
+  .badge{display:inline-block;margin:10px 6px 0;padding:4px 11px;border:1px solid var(--border);
+    border-radius:999px;font-size:.8rem;background:var(--panel)}
+  .badge.compat{color:var(--accent2);border-color:#1f6feb55}
+  a{color:var(--accent2)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 16px 60px;display:grid;
+    grid-template-columns:380px 1fr;gap:18px}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .tab{padding:7px 11px;border:1px solid var(--border);border-radius:9px;cursor:pointer;
+    background:var(--panel2);color:var(--muted);font-size:.82rem}
+  .tab.active{background:#1f6feb22;border-color:#1f6feb66;color:var(--ink)}
+  .fld{margin-bottom:11px}
+  label{display:block;color:var(--muted);font-size:.72rem;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+  input,textarea,select{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--border);
+    border-radius:8px;padding:8px;font:13px ui-monospace,Menlo,monospace}
+  textarea{min-height:54px;resize:vertical}
+  button{background:var(--accent);color:#0d1117;border:0;border-radius:9px;padding:9px 14px;
+    font-weight:700;cursor:pointer}
+  button.ghost{background:transparent;color:var(--accent2);border:1px solid var(--border)}
+  button.sm{padding:6px 10px;font-size:.8rem}
+  .formpane{display:none}
+  .formpane.active{display:block}
+  .hint{color:var(--muted);font-size:.76rem;margin:0 0 10px}
+  .msg{margin-top:10px;font-size:.8rem;font-family:ui-monospace,Menlo,monospace;white-space:pre-wrap}
+  .msg.ok{color:var(--accent)} .msg.bad{color:#ff9d96}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .graph{background:var(--panel2);border-radius:10px;padding:10px;overflow:auto;margin-bottom:14px}
+  .vaultlist{font-size:.82rem}
+  .vaultlist .grp{margin:8px 0 4px;color:var(--accent);font-weight:700}
+  .vaultlist .item{padding:5px 8px;border-left:2px solid var(--border);margin:3px 0;background:var(--panel2);border-radius:6px}
+  .vaultlist .item b{color:var(--ink)}
+  .muted{color:var(--muted)}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Steward Commons — Web UI</h1>
+  <p class="tag">A fully client-side vault. Records are validated against the protocol schemas before they're saved. Nothing leaves your browser.</p>
+  <span class="badge">● Draft v0.1</span>
+  <span class="badge compat">★ Steward Compatible v1.0</span>
+  <div><a class="badge" href="../">← back to protocol site</a></div>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: forms -->
+  <div class="panel">
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-t="project">Project</div>
+      <div class="tab" data-t="decision">Decision</div>
+      <div class="tab" data-t="proposal">Proposal</div>
+      <div class="tab" data-t="evidence">Evidence</div>
+      <div class="tab" data-t="decide">Decide</div>
+      <div class="tab" data-t="outcome">Outcome</div>
+      <div class="tab" data-t="reflection">Reflection</div>
+    </div>
+
+    <div class="formpane active" id="p-project">
+      <p class="hint">Create a project — the root of a reasoning graph.</p>
+      <div class="fld"><label>Name</label><input id="proj-name" placeholder="Atlas Migration"></div>
+      <div class="fld"><label>Description</label><textarea id="proj-desc"></textarea></div>
+      <button onclick="addProject()">Add project</button>
+    </div>
+
+    <div class="formpane" id="p-decision">
+      <p class="hint">Record a decision inside a project.</p>
+      <div class="fld"><label>Project</label><select id="dec-project"></select></div>
+      <div class="fld"><label>Title</label><input id="dec-title" placeholder="Choose a storage engine"></div>
+      <div class="fld"><label>Context</label><textarea id="dec-context"></textarea></div>
+      <button onclick="addDecision()">Add decision</button>
+    </div>
+
+    <div class="formpane" id="p-proposal">
+      <p class="hint">Add a competing proposal to a decision.</p>
+      <div class="fld"><label>Decision</label><select id="prop-decision"></select></div>
+      <div class="fld"><label>Title</label><input id="prop-title" placeholder="DuckDB"></div>
+      <div class="fld"><label>Summary</label><textarea id="prop-summary"></textarea></div>
+      <div class="fld"><label>Tradeoffs (one per line)</label><textarea id="prop-tradeoffs"></textarea></div>
+      <button onclick="addProposal()">Add proposal</button>
+    </div>
+
+    <div class="formpane" id="p-evidence">
+      <p class="hint">Attach evidence / objections to a proposal or decision.</p>
+      <div class="fld"><label>Proposal (optional)</label><select id="ev-proposal"><option value="">— none —</option></select></div>
+      <div class="fld"><label>Decision (optional)</label><select id="ev-decision"><option value="">— none —</option></select></div>
+      <div class="fld"><label>Source type</label><input id="ev-type" placeholder="benchmark"></div>
+      <div class="fld"><label>Summary</label><textarea id="ev-summary"></textarea></div>
+      <div class="fld"><label>Supports (proposal ids, comma-sep)</label><input id="ev-supports"></div>
+      <div class="fld"><label>Challenges (proposal ids, comma-sep)</label><input id="ev-challenges"></div>
+      <button onclick="addEvidence()">Add evidence</button>
+    </div>
+
+    <div class="formpane" id="p-decide">
+      <p class="hint">Mark a decision decided and pick the winning proposal.</p>
+      <div class="fld"><label>Decision</label><select id="decide-decision"></select></div>
+      <div class="fld"><label>Selected proposal</label><select id="decide-proposal"></select></div>
+      <div class="fld"><label>Review date (YYYY-MM-DD)</label><input id="decide-date" placeholder="2026-07-20"></div>
+      <button onclick="doDecide()">Decide</button>
+    </div>
+
+    <div class="formpane" id="p-outcome">
+      <p class="hint">Record what happened after the decision.</p>
+      <div class="fld"><label>Decision</label><select id="out-decision"></select></div>
+      <div class="fld"><label>Summary</label><textarea id="out-summary"></textarea></div>
+      <div class="fld"><label>Metrics (key=value, one per line)</label><textarea id="out-metrics"></textarea></div>
+      <button onclick="addOutcome()">Add outcome</button>
+    </div>
+
+    <div class="formpane" id="p-reflection">
+      <p class="hint">Capture lessons learned.</p>
+      <div class="fld"><label>Decision</label><select id="ref-decision"></select></div>
+      <div class="fld"><label>Summary</label><textarea id="ref-summary"></textarea></div>
+      <div class="fld"><label>Lessons (one per line)</label><textarea id="ref-lessons"></textarea></div>
+      <button onclick="addReflection()">Add reflection</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <!-- RIGHT: vault + graph -->
+  <div>
+    <div class="panel" style="margin-bottom:18px">
+      <div class="toolbar">
+        <button class="sm ghost" onclick="seedDemo()">Load demo</button>
+        <button class="sm ghost" onclick="validateAll()">Validate all</button>
+        <button class="sm ghost" onclick="exportJSONL()">Export CLI JSONL</button>
+        <button class="sm ghost" onclick="exportBundle()">Export bundle</button>
+        <button class="sm ghost" onclick="importBundle()">Import</button>
+        <button class="sm ghost" onclick="clearVault()">Clear</button>
+        <input type="file" id="file" accept=".json" style="display:none" onchange="onImport(event)">
+      </div>
+      <div class="graph"><div class="mermaid" id="mermaid"></div></div>
+    </div>
+    <div class="panel">
+      <div class="vaultlist" id="vaultlist"><span class="muted">Vault is empty. Create a project or load the demo.</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>Steward Commons Web UI · client-side only · compatible with <code>steward.py</code> JSONL vaults</footer>
+
+<script>
+// ---- Protocol schemas (mirror schemas/*.json) ----
+const SCHEMAS = {
+  project: {"type":"object","required":["id","name","created_at"],"properties":{
+    "id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},
+    "created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"}}},
+  decision: {"type":"object","required":["id","project_id","title","status"],"properties":{
+    "id":{"type":"string"},"project_id":{"type":"string"},"title":{"type":"string"},"context":{"type":"string"},
+    "status":{"type":"string","enum":["draft","active","decided","reviewed"]},
+    "selected_proposal_id":{"type":"string"},"review_date":{"type":"string","format":"date"}}},
+  proposal: {"type":"object","required":["id","decision_id","title"],"properties":{
+    "id":{"type":"string"},"decision_id":{"type":"string"},"title":{"type":"string"},
+    "summary":{"type":"string"},"tradeoffs":{"type":"array","items":{"type":"string"}}}},
+  evidence: {"type":"object","required":["id","source_type","summary"],"properties":{
+    "id":{"type":"string"},"source_type":{"type":"string"},"source_url":{"type":"string"},"summary":{"type":"string"},
+    "supports":{"type":"array","items":{"type":"string"}},"challenges":{"type":"array","items":{"type":"string"}}}},
+  outcome: {"type":"object","required":["id","decision_id","observed_at","summary"],"properties":{
+    "id":{"type":"string"},"decision_id":{"type":"string"},"observed_at":{"type":"string","format":"date-time"},
+    "summary":{"type":"string"},"metrics":{"type":"object"}}},
+  reflection: {"type":"object","required":["id","decision_id","summary"],"properties":{
+    "id":{"type":"string"},"decision_id":{"type":"string"},"summary":{"type":"string"},
+    "lessons":{"type":"array","items":{"type":"string"}},"created_at":{"type":"string","format":"date-time"}}}
+};
+const RE_DATE=/^\d{4}-\d{2}-\d{2}$/;
+const RE_DATETIME=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/;
+function typeOk(v,t){if(t==="object")return v&&typeof v==="object"&&!Array.isArray(v);if(t==="array")return Array.isArray(v);if(t==="string")return typeof v==="string";if(t==="integer")return Number.isInteger(v);if(t==="number")return typeof v==="number";if(t==="boolean")return typeof v==="boolean";if(t==="null")return v===null;return true;}
+function validate(inst,schema,path){const e=[];if(schema.type){if(!typeOk(inst,schema.type)){e.push(path+": expected "+schema.type+", got "+typeof inst);return e;}}if((schema.type==="object"||schema.properties||schema.required)&&inst&&typeof inst==="object"){for(const r of(schema.required||[]))if(!(r in inst))e.push(path+": missing required '"+r+"'");for(const k in(schema.properties||{}))if(k in inst)e.push(...validate(inst[k],schema.properties[k],path+"."+k));}if(schema.type==="array"&&schema.items&&Array.isArray(inst))inst.forEach((it,i)=>e.push(...validate(it,schema.items,path+"["+i+"]")));if(schema.enum&&!schema.enum.includes(inst))e.push(path+": "+JSON.stringify(inst)+" not in enum "+JSON.stringify(schema.enum));if(schema.format&&typeof inst==="string"){if(schema.format==="date-time"&&!RE_DATETIME.test(inst))e.push(path+": '"+inst+"' is not a valid date-time");if(schema.format==="date"&&!RE_DATE.test(inst))e.push(path+": '"+inst+"' is not a valid date");}return e;}
+
+// ---- Vault (localStorage) ----
+const KEY="steward_commons_vault_v1";
+const ENT=["project","decision","proposal","evidence","outcome","reflection"];
+let vault=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||empty();}catch(e){return empty();}}
+function empty(){return {project:[],decision:[],proposal:[],evidence:[],outcome:[],reflection:[]};}
+function save(){localStorage.setItem(KEY,JSON.stringify(vault));}
+function uid(p){return p+"_"+Math.random().toString(16).slice(2,10);}
+function now(){return new Date().toISOString().replace(/\.\d{3}Z$/,"Z");}
+function nowDate(){return new Date().toISOString().slice(0,10);}
+function find(entity,id){return vault[entity].find(r=>r.id===id);}
+
+// ---- Tabs ----
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".formpane").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  document.getElementById("p-"+t.dataset.t).classList.add("active");
+});
+
+function setMsg(txt,ok){const m=document.getElementById("msg");m.textContent=txt;m.className="msg "+(ok?"ok":"bad");}
+function valRecord(entity,rec){return validate(rec,SCHEMAS[entity],"$");}
+
+// ---- Add commands ----
+function addProject(){
+  const rec={id:uid("proj"),name:val("proj-name"),description:val("proj-desc"),created_at:now(),updated_at:now()};
+  const e=valRecord("project",rec); if(e.length){return setMsg("Invalid:\n"+e.join("\n"),false);}
+  vault.project.push(rec); save(); setMsg("project created: "+rec.id,true); refresh();
+}
+function addDecision(){
+  const pid=val("dec-project"); if(!find("project",pid))return setMsg("Pick a valid project.",false);
+  const rec={id:uid("dec"),project_id:pid,title:val("dec-title"),context:val("dec-context"),status:"draft"};
+  const e=valRecord("decision",rec); if(e.length)return setMsg("Invalid:\n"+e.join("\n"),false);
+  vault.decision.push(rec); save(); setMsg("decision created: "+rec.id,true); refresh();
+}
+function addProposal(){
+  const did=val("prop-decision"); if(!find("decision",did))return setMsg("Pick a valid decision.",false);
+  const rec={id:uid("prop"),decision_id:did,title:val("prop-title"),summary:val("prop-summary"),
+    tradeoffs:lines("prop-tradeoffs")};
+  const e=valRecord("proposal",rec); if(e.length)return setMsg("Invalid:\n"+e.join("\n"),false);
+  vault.proposal.push(rec); save(); setMsg("proposal added: "+rec.id,true); refresh();
+}
+function addEvidence(){
+  const pr=val("ev-proposal"), dc=val("ev-decision");
+  if(!pr&&!dc)return setMsg("Evidence needs a proposal or a decision.",false);
+  const rec={id:uid("ev"),source_type:val("ev-type"),source_url:"",summary:val("ev-summary"),
+    supports:csv("ev-supports"),challenges:csv("ev-challenges")};
+  if(pr)rec.proposal_id=pr; if(dc)rec.decision_id=dc;
+  const e=valRecord("evidence",rec); if(e.length)return setMsg("Invalid:\n"+e.join("\n"),false);
+  vault.evidence.push(rec); save(); setMsg("evidence added: "+rec.id,true); refresh();
+}
+function doDecide(){
+  const did=val("decide-decision"), pr=val("decide-proposal");
+  if(!find("decision",did)||!find("proposal",pr))return setMsg("Pick a valid decision + proposal.",false);
+  const d=find("decision",did); d.status="decided"; d.selected_proposal_id=pr;
+  d.review_date=val("decide-date")||nowDate();
+  const e=valRecord("decision",d); if(e.length)return setMsg("Invalid:\n"+e.join("\n"),false);
+  save(); setMsg("decided: "+did+" -> "+pr,true); refresh();
+}
+function addOutcome(){
+  const did=val("out-decision"); if(!find("decision",did))return setMsg("Pick a valid decision.",false);
+  const metrics={}; lines("out-metrics").forEach(m=>{if(m.includes("=")){const[i,v]=m.split("=",2);let n=v;if(!isNaN(n))n=Number(n);metrics[i]=n;}});
+  const rec={id:uid("out"),decision_id:did,observed_at:now(),summary:val("out-summary"),metrics};
+  const e=valRecord("outcome",rec); if(e.length)return setMsg("Invalid:\n"+e.join("\n"),false);
+  vault.outcome.push(rec); save(); setMsg("outcome recorded: "+rec.id,true); refresh();
+}
+function addReflection(){
+  const did=val("ref-decision"); if(!find("decision",did))return setMsg("Pick a valid decision.",false);
+  const rec={id:uid("refl"),decision_id:did,summary:val("ref-summary"),lessons:lines("ref-lessons"),created_at:now()};
+  const e=valRecord("reflection",rec); if(e.length)return setMsg("Invalid:\n"+e.join("\n"),false);
+  vault.reflection.push(rec); save(); setMsg("reflection recorded: "+rec.id,true); refresh();
+}
+
+// ---- Helpers ----
+function val(id){return (document.getElementById(id).value||"").trim();}
+function lines(id){return (document.getElementById(id).value||"").split("\n").map(s=>s.trim()).filter(Boolean);}
+function csv(id){return (document.getElementById(id).value||"").split(",").map(s=>s.trim()).filter(Boolean);}
+function opt(sel,items,placeholder){const s=document.getElementById(sel);s.innerHTML="";if(placeholder)s.innerHTML='<option value="">'+placeholder+'</option>';items.forEach(it=>{const o=document.createElement("option");o.value=it.id;o.textContent=it.id+" — "+it.label;s.appendChild(o);});}
+
+function refresh(){
+  opt("dec-project",vault.project.map(p=>({id:p.id,label:p.name})),"— pick project —");
+  opt("prop-decision",vault.decision.map(d=>({id:d.id,label:d.title})),"— pick decision —");
+  opt("ev-proposal",vault.proposal.map(p=>({id:p.id,label:p.title})),"— none —");
+  opt("ev-decision",vault.decision.map(d=>({id:d.id,label:d.title})),"— none —");
+  opt("decide-decision",vault.decision.map(d=>({id:d.id,label:d.title})),"— pick decision —");
+  const dec2prop={};vault.proposal.forEach(p=>{(dec2prop[p.decision_id]=dec2prop[p.decision_id]||[]).push(p);});
+  const dd=document.getElementById("decide-decision");
+  dd.onchange=()=>{const did=dd.value;opt("decide-proposal",(dec2prop[did]||[]).map(p=>({id:p.id,label:p.title})),"— pick proposal —");};
+  opt("out-decision",vault.decision.map(d=>({id:d.id,label:d.title})),"— pick decision —");
+  opt("ref-decision",vault.decision.map(d=>({id:d.id,label:d.title})),"— pick decision —");
+  renderList(); renderGraph();
+}
+
+function renderList(){
+  const el=document.getElementById("vaultlist"); let h="";
+  if(vault.project.length===0){el.innerHTML='<span class="muted">Vault is empty. Create a project or load the demo.</span>';return;}
+  vault.project.forEach(p=>{
+    h+='<div class="grp">Project: <b>'+esc(p.name)+'</b> <span class="muted">'+p.id+'</span></div>';
+    vault.decision.filter(d=>d.project_id===p.id).forEach(d=>{
+      h+='<div class="item">Decision: <b>'+esc(d.title)+'</b> <span class="muted">['+d.status+'] '+d.id+'</span></div>';
+      vault.proposal.filter(x=>x.decision_id===d.id).forEach(pr=>{
+        h+='<div class="item" style="margin-left:14px">proposal: <b>'+esc(pr.title)+'</b> <span class="muted">'+pr.id+(d.selected_proposal_id===pr.id?" ✓chosen":"")+'</span></div>';
+        vault.evidence.filter(e=>e.proposal_id===pr.id).forEach(e=>{
+          h+='<div class="item" style="margin-left:28px;font-size:.78rem">evidence['+esc(e.source_type)+']: '+esc(e.summary)+' <span class="muted">'+e.id+'</span></div>';
+        });
+      });
+      vault.outcome.filter(o=>o.decision_id===d.id).forEach(o=>{
+        h+='<div class="item" style="margin-left:14px;font-size:.78rem">outcome: '+esc(o.summary)+' <span class="muted">'+JSON.stringify(o.metrics||{})+'</span></div>';
+      });
+      vault.reflection.filter(r=>r.decision_id===d.id).forEach(r=>{
+        h+='<div class="item" style="margin-left:14px;font-size:.78rem">reflection: '+esc(r.summary)+'</div>';
+      });
+    });
+  });
+  el.innerHTML=h;
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+
+function renderGraph(){
+  let m="flowchart LR\n";
+  vault.project.forEach(p=>{m+=`  P["${safe(p.name)}"]\n`;vault.decision.filter(d=>d.project_id===p.id).forEach(d=>{m+=`  P --> D${d.id}["${safe(d.title)}"]\n`;vault.proposal.filter(x=>x.decision_id===d.id).forEach(pr=>{m+=`  D${d.id} --> PR${pr.id}["${safe(pr.title)}"]\n`;});if(d.selected_proposal_id)m+=`  D${d.id} -->|chosen| CH${d.id}["${safe(d.selected_proposal_id)}"]\n`;});});});
+  document.getElementById("mermaid").textContent=m;
+  try{mermaid.parse(m);}catch(e){}
+  mermaid.initialize({startOnLoad:false,theme:"dark"});
+  mermaid.run({nodes:[document.getElementById("mermaid")]}).catch(()=>{});
+}
+function safe(s){return String(s).replace(/["\[\]]/g," ").slice(0,40);}
+
+// ---- Validate / export / import ----
+function validateAll(){
+  let total=0,bad=0,report=[];
+  ENT.forEach(en=>vault[en].forEach(r=>{total++;const e=valRecord(en,r);if(e.length){bad++;report.push("["+en+"] "+r.id+"\n  "+e.join("\n  "));}}));
+  if(bad===0)setMsg("OK — "+total+" records validated, 0 violations.",true);
+  else setMsg(bad+"/"+total+" FAILED:\n\n"+report.join("\n\n"),false);
+}
+function download(name,text){
+  const b=new Blob([text],{type:"application/json"});const u=URL.createObjectURL(b);
+  const a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
+}
+function exportJSONL(){
+  // CLI-compatible: one file per entity, one JSON object per line (matches steward.py)
+  const files={project:"projects.jsonl",decision:"decisions.jsonl",proposal:"proposals.jsonl",
+    evidence:"evidence.jsonl",outcome:"outcomes.jsonl",reflection:"reflections.jsonl"};
+  let n=0;
+  ENT.forEach(en=>{if(vault[en].length){download(files[en],vault[en].map(r=>JSON.stringify(r)).join("\n")+"\n");n++;}});
+  setMsg("Exported "+n+" CLI-compatible .jsonl file(s). Drop them in a folder and run: python steward.py validate",true);
+}
+function exportBundle(){download("steward-vault.json",JSON.stringify(vault,null,2));setMsg("Exported steward-vault.json (full vault).",true);}
+function importBundle(){document.getElementById("file").click();}
+function onImport(e){
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const v=JSON.parse(r.result);if(!ENT.every(en=>Array.isArray(v[en])))throw new Error("missing entity arrays");vault=v;save();refresh();setMsg("Imported vault ("+Object.values(v).reduce((a,b)=>a+b.length,0)+" records).",true);}catch(err){setMsg("Import failed: "+err.message,false);}};
+  r.readAsText(f);
+}
+function clearVault(){if(confirm("Clear the entire vault?")){vault=empty();save();refresh();setMsg("Vault cleared.",true);}}
+
+// ---- Demo seed ----
+function seedDemo(){
+  vault=empty();
+  const p={id:uid("proj"),name:"Atlas Migration",description:"Move analytics off the dying warehouse.",created_at:now(),updated_at:now()};
+  const d={id:uid("dec"),project_id:p.id,title:"Choose a storage engine",context:"Warehouse EOL in Q3.",status:"draft"};
+  const pr1={id:uid("prop"),decision_id:d.id,title:"DuckDB",summary:"Embedded, zero ops",tradeoffs:["Limited concurrency"]};
+  const pr2={id:uid("prop"),decision_id:d.id,title:"ClickHouse",summary:"Scales horizontally",tradeoffs:["Heavier ops"]};
+  const ev={id:uid("ev"),proposal_id:pr1.id,source_type:"benchmark",summary:"2B-row scans <4s locally",supports:[],challenges:[]};
+  d.status="decided";d.selected_proposal_id=pr2.id;d.review_date=nowDate();
+  const o={id:uid("out"),decision_id:d.id,observed_at:now(),summary:"Shipped, no incidents",metrics:{p95_ms:11}};
+  const rf={id:uid("refl"),decision_id:d.id,summary:"Held up under load",lessons:["Embedded-first was right"],created_at:now()};
+  vault.project.push(p);vault.decision.push(d);vault.proposal.push(pr1,pr2);vault.evidence.push(ev);vault.outcome.push(o);vault.reflection.push(rf);
+  save();refresh();setMsg("Demo vault loaded. Hit Validate all to confirm 7/7 pass.",true);
+}
+
+refresh();
+</script>
+</body>
+</html>

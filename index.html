@@ -18,8 +18,10 @@
     background:radial-gradient(1200px 400px at 50% -100px,#1f6feb22,transparent)}
   h1{font-size:2.1rem;margin:0 0 6px;letter-spacing:-.5px}
   .tag{color:var(--muted);max-width:680px;margin:0 auto;font-size:1.02rem}
+  a{color:var(--accent2)}
   .badge{display:inline-block;margin-top:14px;padding:5px 12px;border:1px solid var(--border);
     border-radius:999px;color:var(--accent);font-size:.85rem;background:var(--panel)}
+  .badge.compat{color:var(--accent2);border-color:#1f6feb66;background:#1f6feb1a}
   main{max-width:920px;margin:0 auto;padding:0 20px 80px}
   section{background:var(--panel);border:1px solid var(--border);border-radius:14px;
     padding:22px 22px;margin:22px 0}
@@ -53,6 +55,7 @@
   <h1>Steward Commons</h1>
   <p class="tag">An open protocol for preserving how ideas, decisions, evidence, and outcomes evolve — so reasoning becomes a public good that can be reviewed, forked, audited, and improved.</p>
   <span class="badge">● Draft v0.1 · model &amp; OS agnostic · no lock-in</span>
+  <span class="badge compat">★ Steward Compatible v1.0</span>
 </header>
 
 <main>
@@ -111,6 +114,7 @@ flowchart LR
       <div class="card"><h3>steward.py</h3><small>A zero-dependency CLI that runs the MVP and validates vaults against the schemas.</small></div>
       <div class="card"><h3>docs/</h3><small>Protocol, architecture, data model, constitution, vision, glossary, API, CLI.</small></div>
       <div class="card"><h3>examples/</h3><small>A sample project showing the reasoning graph in real data.</small></div>
+      <div class="card"><h3><a href="reference/frontend/index.html">Web UI →</a></h3><small>Client-side vault: build a reasoning graph, validate against the schemas, export CLI-compatible JSONL.</small></div>
     </div>
   </section>
 
