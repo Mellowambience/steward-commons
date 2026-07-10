@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Steward Commons — an open protocol for durable reasoning</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2430; --ink:#e6edf3;
+    --muted:#8b949e; --accent:#7ee787; --accent2:#58a6ff; --border:#30363d;
+    --warn:#f85149;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink)}
+  header{padding:48px 24px 28px;text-align:center;
+    background:radial-gradient(1200px 400px at 50% -100px,#1f6feb22,transparent)}
+  h1{font-size:2.1rem;margin:0 0 6px;letter-spacing:-.5px}
+  .tag{color:var(--muted);max-width:680px;margin:0 auto;font-size:1.02rem}
+  .badge{display:inline-block;margin-top:14px;padding:5px 12px;border:1px solid var(--border);
+    border-radius:999px;color:var(--accent);font-size:.85rem;background:var(--panel)}
+  main{max-width:920px;margin:0 auto;padding:0 20px 80px}
+  section{background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:22px 22px;margin:22px 0}
+  h2{margin:0 0 10px;font-size:1.25rem}
+  p{color:#c9d1d9}
+  .mermaid{background:var(--panel2);border-radius:10px;padding:12px;overflow:auto}
+  textarea,select{width:100%;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--border);border-radius:10px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+  textarea{min-height:200px;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+  .row > div{flex:1;min-width:200px}
+  label{display:block;color:var(--muted);font-size:.8rem;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+  button{background:var(--accent);color:#0d1117;border:0;border-radius:10px;
+    padding:11px 18px;font-weight:700;cursor:pointer;font-size:.95rem}
+  button.ghost{background:transparent;color:var(--accent2);border:1px solid var(--border)}
+  .result{margin-top:16px;padding:14px;border-radius:10px;font-family:ui-monospace,Menlo,monospace;
+    font-size:.85rem;white-space:pre-wrap;display:none}
+  .ok{background:#12251a;border:1px solid #1f7a3d;color:var(--accent)}
+  .bad{background:#2a1416;border:1px solid #7a1f24;color:#ff9d96}
+  code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:.85em}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px}
+  a{color:var(--accent2)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .card h3{margin:0 0 6px;font-size:1rem;color:var(--accent)}
+  .card small{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Steward Commons</h1>
+  <p class="tag">An open protocol for preserving how ideas, decisions, evidence, and outcomes evolve — so reasoning becomes a public good that can be reviewed, forked, audited, and improved.</p>
+  <span class="badge">● Draft v0.1 · model &amp; OS agnostic · no lock-in</span>
+</header>
+
+<main>
+  <section>
+    <h2>The reasoning graph</h2>
+    <p>Every project becomes a living graph of judgment. The shape below is enforced by the JSON schemas in this repo — and by the validator further down.</p>
+    <div class="mermaid">
+flowchart LR
+  P[Project] --> D[Decision]
+  D --> P1[Proposal A]
+  D --> P2[Proposal B]
+  P1 --> E1[Evidence / Objection]
+  P2 --> E2[Evidence / Objection]
+  D -->|selected| S((Chosen))
+  D --> O[Outcome]
+  O --> R[Reflection]
+  R -.->|improves| D
+    </div>
+  </section>
+
+  <section>
+    <h2>Live validator</h2>
+    <p>Paste a record (the JSON for a project, decision, proposal, evidence, outcome, or reflection) and validate it against the protocol schemas — entirely in your browser, no server.</p>
+    <div class="row">
+      <div>
+        <label for="kind">Record type</label>
+        <select id="kind">
+          <option value="project">project</option>
+          <option value="decision" selected>decision</option>
+          <option value="proposal">proposal</option>
+          <option value="evidence">evidence</option>
+          <option value="outcome">outcome</option>
+          <option value="reflection">reflection</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="run">Validate</button>
+        <button id="sample" class="ghost">Load sample</button>
+      </div>
+    </div>
+    <textarea id="input" spellcheck="false">{
+  "id": "dec_01",
+  "project_id": "proj_01",
+  "title": "Choose a storage engine",
+  "status": "decided",
+  "selected_proposal_id": "prop_01"
+}</textarea>
+    <div id="result" class="result"></div>
+  </section>
+
+  <section>
+    <h2>What's in the repo</h2>
+    <div class="grid">
+      <div class="card"><h3>schemas/</h3><small>6 JSON Schemas (draft 2020-12): project, decision, proposal, evidence, outcome, reflection.</small></div>
+      <div class="card"><h3>steward.py</h3><small>A zero-dependency CLI that runs the MVP and validates vaults against the schemas.</small></div>
+      <div class="card"><h3>docs/</h3><small>Protocol, architecture, data model, constitution, vision, glossary, API, CLI.</small></div>
+      <div class="card"><h3>examples/</h3><small>A sample project showing the reasoning graph in real data.</small></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Run it locally</h2>
+    <p>Clone the repo and try the reference implementation:</p>
+    <p><code>python steward.py demo</code> &nbsp;— builds + validates a full reasoning graph<br>
+    <code>python steward.py init &amp;&amp; python steward.py project new --name "Atlas"</code> &nbsp;— start your own vault<br>
+    <code>python steward.py validate</code> &nbsp;— check every record against the schemas</p>
+  </section>
+</main>
+
+<footer>
+  Steward Commons · part of <a href="https://github.com/Mellowambience/steward-protocol">The Steward Project</a> · MIT Licensed
+</footer>
+
+<script>
+// ---- Inline copy of the protocol schemas (mirrors schemas/*.json) ----
+const SCHEMAS = {
+  project: {"type":"object","required":["id","name","created_at"],"properties":{
+    "id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},
+    "created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"}}},
+  decision: {"type":"object","required":["id","project_id","title","status"],"properties":{
+    "id":{"type":"string"},"project_id":{"type":"string"},"title":{"type":"string"},"context":{"type":"string"},
+    "status":{"type":"string","enum":["draft","active","decided","reviewed"]},
+    "selected_proposal_id":{"type":"string"},"review_date":{"type":"string","format":"date"}}},
+  proposal: {"type":"object","required":["id","decision_id","title"],"properties":{
+    "id":{"type":"string"},"decision_id":{"type":"string"},"title":{"type":"string"},
+    "summary":{"type":"string"},"tradeoffs":{"type":"array","items":{"type":"string"}}}},
+  evidence: {"type":"object","required":["id","source_type","summary"],"properties":{
+    "id":{"type":"string"},"source_type":{"type":"string"},"source_url":{"type":"string"},"summary":{"type":"string"},
+    "supports":{"type":"array","items":{"type":"string"}},"challenges":{"type":"array","items":{"type":"string"}}}},
+  outcome: {"type":"object","required":["id","decision_id","observed_at","summary"],"properties":{
+    "id":{"type":"string"},"decision_id":{"type":"string"},"observed_at":{"type":"string","format":"date-time"},
+    "summary":{"type":"string"},"metrics":{"type":"object"}}},
+  reflection: {"type":"object","required":["id","decision_id","summary"],"properties":{
+    "id":{"type":"string"},"decision_id":{"type":"string"},"summary":{"type":"string"},
+    "lessons":{"type":"array","items":{"type":"string"}},"created_at":{"type":"string","format":"date-time"}}}
+};
+
+const RE_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const RE_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/;
+
+function typeOk(v, t){
+  if(t==="object") return v && typeof v==="object" && !Array.isArray(v);
+  if(t==="array") return Array.isArray(v);
+  if(t==="string") return typeof v==="string";
+  if(t==="integer") return Number.isInteger(v);
+  if(t==="number") return typeof v==="number";
+  if(t==="boolean") return typeof v==="boolean";
+  if(t==="null") return v===null;
+  return true;
+}
+function validate(inst, schema, path){
+  const errs=[];
+  if(schema.type){
+    if(!typeOk(inst, schema.type)){
+      errs.push(`${path}: expected ${schema.type}, got ${typeof inst}`); return errs;
+    }
+  }
+  if((schema.type==="object"||schema.properties||schema.required) && inst && typeof inst==="object"){
+    for(const r of (schema.required||[])) if(!(r in inst)) errs.push(`${path}: missing required '${r}'`);
+    for(const k in (schema.properties||{})) if(k in inst) errs.push(...validate(inst[k], schema.properties[k], `${path}.${k}`));
+  }
+  if(schema.type==="array" && schema.items && Array.isArray(inst))
+    inst.forEach((it,i)=>errs.push(...validate(it, schema.items, `${path}[${i}]`)));
+  if(schema.enum && !schema.enum.includes(inst)) errs.push(`${path}: ${JSON.stringify(inst)} not in enum ${JSON.stringify(schema.enum)}`);
+  if(schema.format && typeof inst==="string"){
+    if(schema.format==="date-time" && !RE_DATETIME.test(inst)) errs.push(`${path}: '${inst}' is not a valid date-time`);
+    if(schema.format==="date" && !RE_DATE.test(inst)) errs.push(`${path}: '${inst}' is not a valid date`);
+  }
+  return errs;
+}
+
+const SAMPLES = {
+  project:'{\n  "id":"proj_01",\n  "name":"Atlas Migration",\n  "description":"Move analytics off the dying warehouse.",\n  "created_at":"2026-07-10T00:00:00Z"\n}',
+  decision:'{\n  "id":"dec_01",\n  "project_id":"proj_01",\n  "title":"Choose a storage engine",\n  "status":"decided",\n  "selected_proposal_id":"prop_01"\n}',
+  proposal:'{\n  "id":"prop_01",\n  "decision_id":"dec_01",\n  "title":"DuckDB",\n  "summary":"Embedded, zero ops",\n  "tradeoffs":["Limited concurrency"]\n}',
+  evidence:'{\n  "id":"ev_01",\n  "source_type":"benchmark",\n  "summary":"Scans 2B rows in <4s",\n  "supports":["prop_01"]\n}',
+  outcome:'{\n  "id":"out_01",\n  "decision_id":"dec_01",\n  "observed_at":"2026-07-20T00:00:00Z",\n  "summary":"Shipped, no incidents",\n  "metrics":{"p95_ms":11}\n}',
+  reflection:'{\n  "id":"refl_01",\n  "decision_id":"dec_01",\n  "summary":"Held up under load",\n  "lessons":["Embedded-first was right"]\n}'
+};
+
+const $ = s=>document.querySelector(s);
+$("#run").onclick = ()=>{
+  const kind=$("#kind").value, raw=$("#input").value, box=$("#result");
+  box.style.display="block";
+  let inst;
+  try{ inst=JSON.parse(raw); }
+  catch(e){ box.className="result bad"; box.textContent="JSON parse error: "+e.message; return; }
+  const errs=validate(inst, SCHEMAS[kind], "$");
+  if(errs.length===0){ box.className="result ok"; box.textContent=`OK — valid ${kind} record (conforms to schema).`; }
+  else{ box.className="result bad"; box.textContent=`${errs.length} violation(s):\n\n`+errs.join("\n"); }
+};
+$("#sample").onclick = ()=>{ $("#input").value = SAMPLES[$("#kind").value]; };
+
+mermaid.initialize({startOnLoad:true, theme:"dark"});
+</script>
+</body>
+</html>
