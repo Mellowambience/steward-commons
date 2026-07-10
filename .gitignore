@@ -1,0 +1,27 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Node / Python build artifacts (reference impls)
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.local
+
+# Local data / runtime
+*.log
+data/
+tmp/
+
+# Dependabot / lock noise
+package-lock.json.bak
+yarn.lock.bak

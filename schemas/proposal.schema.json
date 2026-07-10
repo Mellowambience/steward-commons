@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Proposal","type":"object","required":["id","decision_id","title"],"properties":{"id":{"type":"string"},"decision_id":{"type":"string"},"title":{"type":"string"},"summary":{"type":"string"},"tradeoffs":{"type":"array","items":{"type":"string"}}}}

@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Reflection","type":"object","required":["id","decision_id","summary"],"properties":{"id":{"type":"string"},"decision_id":{"type":"string"},"summary":{"type":"string"},"lessons":{"type":"array","items":{"type":"string"}},"created_at":{"type":"string","format":"date-time"}}}

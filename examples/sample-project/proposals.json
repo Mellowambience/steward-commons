@@ -1,0 +1,16 @@
+[
+  {
+    "id": "proposal_protocol_first",
+    "decision_id": "decision_protocol_first",
+    "title": "Start with an open protocol",
+    "summary": "Define shared objects, schemas, and governance before building products.",
+    "tradeoffs": ["Slower initial UX", "Stronger long-term interoperability"]
+  },
+  {
+    "id": "proposal_app_first",
+    "decision_id": "decision_protocol_first",
+    "title": "Start with a polished application",
+    "summary": "Build a focused product first and extract the protocol later.",
+    "tradeoffs": ["Faster demo", "Higher risk of lock-in"]
+  }
+]

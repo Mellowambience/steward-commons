@@ -1,0 +1,9 @@
+{
+  "id": "decision_protocol_first",
+  "project_id": "project_steward_commons",
+  "title": "Should Steward Commons begin as a protocol or an app?",
+  "context": "The project needs a foundation that can outlive any single implementation.",
+  "status": "decided",
+  "selected_proposal_id": "proposal_protocol_first",
+  "review_date": "2026-10-09"
+}

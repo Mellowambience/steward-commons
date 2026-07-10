@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Outcome","type":"object","required":["id","decision_id","observed_at","summary"],"properties":{"id":{"type":"string"},"decision_id":{"type":"string"},"observed_at":{"type":"string","format":"date-time"},"summary":{"type":"string"},"metrics":{"type":"object"}}}
